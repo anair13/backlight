@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include "HSV.h"
-#include "SerialHandlerWindows.h"
 
 const int W = 200;
 const int H = 200;
@@ -81,6 +80,43 @@ const int BAUD_RATE = 9600;
 	void delay(int ms) {
 		Sleep(ms);
 	}
+#else
+    #include "SerialHandlerUnix.h"
+    #include <gtkmm.h>
+    #include <gdkmm.h>
+    #include <time.h>
+
+	std::string PORT = "/dev/ttyACM0";
+
+    Gtk::Main kit;
+    Glib::RefPtr<Gdk::Window> win;
+    Glib::RefPtr<Gdk::Pixbuf> pb;
+    BYTE* pixels;
+
+	void init() {
+        Glib::RefPtr<Gdk::Screen> screen = Gdk::Screen::get_default();
+        SCR_W = screen->get_width();
+        SCR_H = screen->get_height();
+        win = screen->get_root_window();
+        pb = Gdk::Pixbuf::create(win, 0, 0, SCR_W, SCR_H);
+        pixels = pb->get_pixels();
+	}
+	void deinit() {
+	}
+	void updatePixels() {
+        pixels = pb->get_pixels();
+	}
+	Color getPixel(int x, int y) {
+        BYTE r = pixels[(x + y * SCR_W) * 3];
+        BYTE g = pixels[(x + y * SCR_W) * 3 + 1];
+        BYTE b = pixels[(x + y * SCR_W) * 3 + 2];
+        return Color(r, g, b);
+	}
+	void delay(int ms) {
+        clock_t goal = ms + clock();
+        while(goal > clock());
+	}
+
 #endif
 
 int main() {
