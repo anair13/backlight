@@ -53,7 +53,6 @@ public:
         for(i = 0 ; i < sizeof(c) ; i++)
         {
             fprintf(file,"%d", c[i]); //Writing to the file
-            fprintf(file,"%c",','); //To separate digits
         }
         //fclose(file);
 	}
