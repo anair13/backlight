@@ -13,6 +13,7 @@ class SerialHandler
 public:
 	SerialHandler(std::string port, unsigned int baudRate)
 	{
+        /*
         int serial = open(port.c_str(), O_RDWR|O_NOCTTY);
 
         struct termios tty;
@@ -37,6 +38,8 @@ public:
         cfmakeraw(&tty);
 
         tcflush(serial, TCIFLUSH );
+        */
+        file = fopen(port.c_str(), "w");
     }
 
 	void writeSerial(unsigned char r, unsigned char g, unsigned char b) {
@@ -45,11 +48,19 @@ public:
 		c[1] = r;
 		c[2] = g;
 		c[3] = b;
-        write(serial, c, sizeof(c));
+        //write(serial, c, sizeof(c));
+        int i = 0;
+        for(i = 0 ; i < 3 ; i++)
+        {
+            fprintf(file,"%d", c[i]); //Writing to the file
+            fprintf(file,"%c",','); //To separate digits
+            sleep(1);
+        }
+        fclose(file);
 	}
 
 private:
-    int serial;
+    FILE* file;
 };
 
 #endif
