@@ -55,7 +55,7 @@ public:
             fprintf(file,"%d", c[i]); //Writing to the file
             fprintf(file,"%c",','); //To separate digits
         }
-        fclose(file);
+        //fclose(file);
 	}
 
 private:
