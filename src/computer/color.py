@@ -1,3 +1,4 @@
+from __future__ import division
 import math
 
 """
@@ -17,6 +18,24 @@ HSV values are automatically updated when RGB values are set, and vice versa
 
 class Color(object):
     def __init__(self, r=0, g=0, b=0, h=0, s=0, v=0):
+        """
+        >>> c = Color(255, 255, 60)
+        >>> c.h
+        42
+        >>> c.s
+        195
+        >>> c.v
+        255
+        >>> c.h = 85
+        >>> c.s = 178
+        >>> c.v = 127
+        >>> c.r
+        38
+        >>> c.g
+        127
+        >>> c.b
+        38
+        """
         self._r = r
         self._g = g
         self._b = b
@@ -30,7 +49,7 @@ class Color(object):
         if d == 0:
             d = 1 # division by zero protection
         if mx != 0:
-            self._s = math.floor(d * 255 / mx)
+            self._s = int((d * 255 / mx))
         else:
             self._s = 0
             self._h = 0
@@ -47,7 +66,7 @@ class Color(object):
         if self._h < 0:
             self._h += 360
 
-        self._h = math.floor(self._h * 255 / 360)
+        self._h = int(self._h * 255 / 360)
 
     def updateRGB(self):
         h = self._h * 360 / 255
@@ -55,40 +74,40 @@ class Color(object):
         v = self._v / 255
 
         if s == 0:
-            self._r = math.floor(v * 255)
-            self._g = math.floor(v * 255)
-            self._b = math.floor(v * 255)
+            self._r = int(v * 255)
+            self._g = int(v * 255)
+            self._b = int(v * 255)
             return
         h /= 60
-        i = math.floor(h)
+        i = int(h)
         f = h - i
         p = v * (1 - s)
         q = v * (1 - s * f)
         t = v * (1 - s * (1 - f))
         if i == 0:
-            self._r = math.floor(v * 255)
-            self._g = math.floor(t * 255)
-            self._b = math.floor(p * 255)
+            self._r = int(v * 255)
+            self._g = int(t * 255)
+            self._b = int(p * 255)
         elif i == 1:
-            self._r = math.floor(q * 255)
-            self._g = math.floor(v * 255)
-            self._b = math.floor(p * 255)
+            self._r = int(q * 255)
+            self._g = int(v * 255)
+            self._b = int(p * 255)
         elif i == 2:
-            self._r = math.floor(p * 255)
-            self._g = math.floor(v * 255)
-            self._b = math.floor(t * 255)
+            self._r = int(p * 255)
+            self._g = int(v * 255)
+            self._b = int(t * 255)
         elif i == 3:
-            self._r = math.floor(p * 255)
-            self._g = math.floor(q * 255)
-            self._b = math.floor(v * 255)
+            self._r = int(p * 255)
+            self._g = int(q * 255)
+            self._b = int(v * 255)
         elif i == 4:
-            self._r = math.floor(t * 255)
-            self._g = math.floor(p * 255)
-            self._b = math.floor(v * 255)
+            self._r = int(t * 255)
+            self._g = int(p * 255)
+            self._b = int(v * 255)
         else:
-            self._r = math.floor(v * 255)
-            self._g = math.floor(p * 255)
-            self._b = math.floor(q * 255)
+            self._r = int(v * 255)
+            self._g = int(p * 255)
+            self._b = int(q * 255)
 
     @property
     def r(self):
