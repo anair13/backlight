@@ -138,6 +138,7 @@ int main() {
 		RGBtoHSV(sumR, sumG, sumB, &h, &s, &v);
 		s = 255;
 		HSVtoRGB(&sumR, &sumG, &sumB, h, s, v);
+		std::cout << sumR << "," << sumG << "," << sumB << '\n';
 		serialHandler.writeSerial(sumR, sumG, sumB);
 		delay(10);
 	}

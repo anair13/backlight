@@ -1,6 +1,6 @@
 import wave
 
-source = "music/pianoc.wav"
+source = "music/fiddle.wav"
 destination = source[:-4] + "_mono.wav"
 
 source, destination = wave.open(source, "r"), wave.open(destination, "w")
