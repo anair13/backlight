@@ -50,11 +50,10 @@ public:
 		c[3] = b;
         //write(serial, c, sizeof(c));
         int i = 0;
-        for(i = 0 ; i < 3 ; i++)
+        for(i = 0 ; i < sizeof(c) ; i++)
         {
             fprintf(file,"%d", c[i]); //Writing to the file
             fprintf(file,"%c",','); //To separate digits
-            sleep(1);
         }
         fclose(file);
 	}
