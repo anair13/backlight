@@ -88,10 +88,15 @@ const int BAUD_RATE = 9600;
 
 	std::string PORT = "/dev/ttyACM0";
 
+    Glib::RefPtr<Gtk::Application> app;
+
     Gtk::Main kit;
     Glib::RefPtr<Gdk::Window> win;
     Glib::RefPtr<Gdk::Pixbuf> pb;
     BYTE* pixels;
+
+    int rowstride;
+    int channels;
 
 	void init() {
         Glib::RefPtr<Gdk::Screen> screen = Gdk::Screen::get_default();
@@ -100,16 +105,19 @@ const int BAUD_RATE = 9600;
         win = screen->get_root_window();
         pb = Gdk::Pixbuf::create(win, 0, 0, SCR_W, SCR_H);
         pixels = pb->get_pixels();
+        rowstride = pb->get_rowstride();
+        channels = pb->get_n_channels();
 	}
 	void deinit() {
 	}
 	void updatePixels() {
+        pb = Gdk::Pixbuf::create(win, 0, 0, SCR_W, SCR_H);
         pixels = pb->get_pixels();
 	}
 	Color getPixel(int x, int y) {
-        BYTE r = pixels[(x + y * SCR_W) * 3];
-        BYTE g = pixels[(x + y * SCR_W) * 3 + 1];
-        BYTE b = pixels[(x + y * SCR_W) * 3 + 2];
+        BYTE r = pixels[y * rowstride + x * channels];
+        BYTE g = pixels[y * rowstride + x * channels + 1]; 
+        BYTE b = pixels[y * rowstride + x * channels + 2];
         return Color(r, g, b);
 	}
 	void delay(int ms) {
@@ -136,9 +144,9 @@ int main() {
 		sumR /= totalPixels; sumG /= totalPixels; sumB /= totalPixels;
 		int h = 0, s = 0, v = 0;
 		RGBtoHSV(sumR, sumG, sumB, &h, &s, &v);
+        v = (v * s) / 255;
 		s = 255;
 		HSVtoRGB(&sumR, &sumG, &sumB, h, s, v);
-		std::cout << sumR << "," << sumG << "," << sumB << '\n';
 		serialHandler.writeSerial(sumR, sumG, sumB);
 		delay(10);
 	}
