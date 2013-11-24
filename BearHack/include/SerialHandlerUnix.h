@@ -1,6 +1,9 @@
 #ifndef SERIALHANDLER_UNIX_H
 #define SERIALHANDLER_UNIX_H
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <string.h>     // string function definitions
 #include <fcntl.h>      // File control definitions
 #include <termios.h>    // POSIX terminal control definitions
