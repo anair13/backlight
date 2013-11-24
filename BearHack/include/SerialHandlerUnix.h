@@ -7,6 +7,7 @@
 #include <string.h>     // string function definitions
 #include <fcntl.h>      // File control definitions
 #include <termios.h>    // POSIX terminal control definitions
+#include <sstream>
 
 class SerialHandler
 {
@@ -39,7 +40,7 @@ public:
 
         tcflush(serial, TCIFLUSH );
         */
-        file = fopen(port.c_str(), "w");
+        //file = fopen(port.c_str(), "w");
     }
 
 	void writeSerial(unsigned char r, unsigned char g, unsigned char b) {
@@ -48,17 +49,21 @@ public:
 		c[1] = r;
 		c[2] = g;
 		c[3] = b;
+        std::stringstream ss;
+        ss << "python sendColor.py " << r << " " << g << " " << b;
+        system(ss.str().c_str());
         //write(serial, c, sizeof(c));
-        int i = 0;
-        for(i = 0 ; i < sizeof(c) ; i++)
+        /*
+        for(int i = 0 ; i < 4; i++)
         {
-            fprintf(file,"%d", c[i]); //Writing to the file
+            fprintf(file,"%d", c[i]);
         }
+        */
         //fclose(file);
 	}
 
 private:
-    FILE* file;
+    //FILE* file;
 };
 
 #endif
