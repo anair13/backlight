@@ -29,59 +29,41 @@ void delay(int ms);
 
 const int BAUD_RATE = 9600;
 
-#include "SerialHandlerWindows.h"
-#include <Windows.h>
-#pragma comment(lib, "winmm.lib")
+#include "SerialHandlerUnix.h"
+#include <QDesktopWidget>
+#include <QApplication>
+#include <QPixmap>
+#include <time.h>
 
-std::string PORT = "COM3";
+std::string PORT = "/dev/ttyACM0";
+QApplication* app;
+QImage* winIm;
 
-HWND hwnd;
-HDC hdc;
-HDC chdc;
-HBITMAP hbitmap;
-RGBQUAD* pixels;
-BITMAPINFO bmi;
-
-void init() {
-	SCR_W = GetSystemMetrics(SM_CXSCREEN);
-	SCR_H = GetSystemMetrics(SM_CYSCREEN);
-	
-	hwnd = GetDesktopWindow();
-	hdc = GetDC(hwnd);
-	chdc = CreateCompatibleDC(hdc);
-	hbitmap = CreateCompatibleBitmap(hdc, SCR_W, SCR_H);
-	SelectObject(chdc, hbitmap);
-	
-	bmi.bmiHeader.biSize = sizeof(bmi.bmiHeader);
-	bmi.bmiHeader.biWidth = SCR_W;
-	bmi.bmiHeader.biHeight = SCR_H;
-	bmi.bmiHeader.biPlanes = 1;
-	bmi.bmiHeader.biBitCount = 32;
-	bmi.bmiHeader.biCompression = BI_RGB;
-
-	pixels = new RGBQUAD[SCR_W * SCR_H];
+void init(int argc, char** argv) {
+    app = new QApplication(argc, argv);
+    winIm = new QImage();
 }
 void deinit() {
-	delete[] pixels;
-
-	ReleaseDC(hwnd, hdc);
-	DeleteDC(chdc);
-	DeleteObject(hbitmap);
 }
 void updatePixels() {
-	BitBlt(chdc, 0, 0, SCR_W, SCR_H, hdc, 0, 0, SRCCOPY | CAPTUREBLT);
-	GetDIBits(chdc, hbitmap, 0, SCR_H, pixels, &bmi, DIB_RGB_COLORS);
+    delete winIm;
+    winIm = new QImage();
+    *winIm = QPixmap::grabWindow(QApplication::desktop()->winId()).toImage();
+    SCR_W = winIm->width();
+    SCR_H = winIm->height();
 }
 Color getPixel(int x, int y) {
-	RGBQUAD c = pixels[x + y * SCR_W];
-	return Color(c.rgbRed, c.rgbGreen, c.rgbBlue);
+    QRgb rgb = winIm->pixel(x, y);
+    QColor c = QColor(rgb);
+    return Color(c.red(), c.green(), c.blue());
 }
 void delay(int ms) {
-	Sleep(ms);
+    clock_t goal = ms + clock();
+    while(goal > clock());
 }
 
-int main() {
-	init();
+int main(int argc, char** argv) {
+	init(argc, argv);
 	SerialHandler serialHandler(PORT, BAUD_RATE);
 	while(true) {
 		updatePixels();
@@ -97,7 +79,7 @@ int main() {
 		sumR /= totalPixels; sumG /= totalPixels; sumB /= totalPixels;
 		int h = 0, s = 0, v = 0;
 		RGBtoHSV(sumR, sumG, sumB, &h, &s, &v);
-        v = (v * s) / 255;
+        //v = (v * s) / 255;
 		s = 255;
 		HSVtoRGB(&sumR, &sumG, &sumB, h, s, v);
 		serialHandler.writeSerial(sumR, sumG, sumB);

@@ -29,55 +29,48 @@ void delay(int ms);
 
 const int BAUD_RATE = 9600;
 
-#include "SerialHandlerWindows.h"
-#include <Windows.h>
-#pragma comment(lib, "winmm.lib")
+#include "SerialHandlerUnix.h"
+#include <gtkmm.h>
+#include <gdkmm.h>
+#include <time.h>
 
-std::string PORT = "COM3";
+std::string PORT = "/dev/ttyACM0";
 
-HWND hwnd;
-HDC hdc;
-HDC chdc;
-HBITMAP hbitmap;
-RGBQUAD* pixels;
-BITMAPINFO bmi;
+Glib::RefPtr<Gtk::Application> app;
+
+Gtk::Main kit;
+Glib::RefPtr<Gdk::Window> win;
+Glib::RefPtr<Gdk::Pixbuf> pb;
+BYTE* pixels;
+
+int rowstride;
+int channels;
 
 void init() {
-	SCR_W = GetSystemMetrics(SM_CXSCREEN);
-	SCR_H = GetSystemMetrics(SM_CYSCREEN);
-	
-	hwnd = GetDesktopWindow();
-	hdc = GetDC(hwnd);
-	chdc = CreateCompatibleDC(hdc);
-	hbitmap = CreateCompatibleBitmap(hdc, SCR_W, SCR_H);
-	SelectObject(chdc, hbitmap);
-	
-	bmi.bmiHeader.biSize = sizeof(bmi.bmiHeader);
-	bmi.bmiHeader.biWidth = SCR_W;
-	bmi.bmiHeader.biHeight = SCR_H;
-	bmi.bmiHeader.biPlanes = 1;
-	bmi.bmiHeader.biBitCount = 32;
-	bmi.bmiHeader.biCompression = BI_RGB;
-
-	pixels = new RGBQUAD[SCR_W * SCR_H];
+    Glib::RefPtr<Gdk::Screen> screen = Gdk::Screen::get_default();
+    SCR_W = screen->get_width();
+    SCR_H = screen->get_height();
+    win = screen->get_root_window();
+    pb = Gdk::Pixbuf::create(win, 0, 0, SCR_W, SCR_H);
+    pixels = pb->get_pixels();
+    rowstride = pb->get_rowstride();
+    channels = pb->get_n_channels();
 }
 void deinit() {
-	delete[] pixels;
-
-	ReleaseDC(hwnd, hdc);
-	DeleteDC(chdc);
-	DeleteObject(hbitmap);
 }
 void updatePixels() {
-	BitBlt(chdc, 0, 0, SCR_W, SCR_H, hdc, 0, 0, SRCCOPY | CAPTUREBLT);
-	GetDIBits(chdc, hbitmap, 0, SCR_H, pixels, &bmi, DIB_RGB_COLORS);
+    pb = Gdk::Pixbuf::create(win, 0, 0, SCR_W, SCR_H);
+    pixels = pb->get_pixels();
 }
 Color getPixel(int x, int y) {
-	RGBQUAD c = pixels[x + y * SCR_W];
-	return Color(c.rgbRed, c.rgbGreen, c.rgbBlue);
+    BYTE r = pixels[y * rowstride + x * channels];
+    BYTE g = pixels[y * rowstride + x * channels + 1]; 
+    BYTE b = pixels[y * rowstride + x * channels + 2];
+    return Color(r, g, b);
 }
 void delay(int ms) {
-	Sleep(ms);
+    clock_t goal = ms + clock();
+    while(goal > clock());
 }
 
 int main() {
