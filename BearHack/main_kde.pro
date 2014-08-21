@@ -1,5 +1,5 @@
 INCLUDEPATH += ./include
-TARGET = bin/BearHack
+TARGET = bin/ScreenLight
 LIBS += -Llib -lboost_system
 TEMPLATE += app
 QT += gui 
