@@ -30,51 +30,40 @@ void delay(int ms);
 const int BAUD_RATE = 9600;
 
 #include "SerialHandlerUnix.h"
-#include <gtkmm.h>
-#include <gdkmm.h>
+#include <QDesktopWidget>
+#include <QApplication>
+#include <QPixmap>
 #include <time.h>
 
 std::string PORT = "/dev/ttyACM0";
+QApplication* app;
+QImage* winIm;
 
-Glib::RefPtr<Gtk::Application> app;
-
-Gtk::Main kit;
-Glib::RefPtr<Gdk::Window> win;
-Glib::RefPtr<Gdk::Pixbuf> pb;
-BYTE* pixels;
-
-int rowstride;
-int channels;
-
-void init() {
-    Glib::RefPtr<Gdk::Screen> screen = Gdk::Screen::get_default();
-    SCR_W = screen->get_width();
-    SCR_H = screen->get_height();
-    win = screen->get_root_window();
-    pb = Gdk::Pixbuf::create(win, 0, 0, SCR_W, SCR_H);
-    pixels = pb->get_pixels();
-    rowstride = pb->get_rowstride();
-    channels = pb->get_n_channels();
+void init(int argc, char** argv) {
+    app = new QApplication(argc, argv);
+    winIm = new QImage();
 }
 void deinit() {
 }
 void updatePixels() {
-    pb = Gdk::Pixbuf::create(win, 0, 0, SCR_W, SCR_H);
-    pixels = pb->get_pixels();
+    delete winIm;
+    winIm = new QImage();
+    *winIm = QPixmap::grabWindow(QApplication::desktop()->winId()).toImage();
+    SCR_W = winIm->width();
+    SCR_H = winIm->height();
 }
 Color getPixel(int x, int y) {
-    BYTE r = pixels[y * rowstride + x * channels];
-    BYTE g = pixels[y * rowstride + x * channels + 1]; 
-    BYTE b = pixels[y * rowstride + x * channels + 2];
-    return Color(r, g, b);
+    QRgb rgb = winIm->pixel(x, y);
+    QColor c = QColor(rgb);
+    return Color(c.red(), c.green(), c.blue());
 }
 void delay(int ms) {
     clock_t goal = ms + clock();
     while(goal > clock());
 }
 
-int main() {
-	init();
+int main(int argc, char** argv) {
+	init(argc, argv);
 	SerialHandler serialHandler(PORT, BAUD_RATE);
 	while(true) {
 		updatePixels();
