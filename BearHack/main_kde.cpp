@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 		sumR /= totalPixels; sumG /= totalPixels; sumB /= totalPixels;
 		int h = 0, s = 0, v = 0;
 		RGBtoHSV(sumR, sumG, sumB, &h, &s, &v);
-        v = (v * s) / 255;
+        //v = (v * s) / 255;
 		s = 255;
 		HSVtoRGB(&sumR, &sumG, &sumB, h, s, v);
 		serialHandler.writeSerial(sumR, sumG, sumB);
