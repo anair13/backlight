@@ -23,9 +23,9 @@ void serialEvent() {
   
   if (numByte > 2) {
     // control led brightness through pulse-width modulation
-    analogWrite (redPin, buffer[0]);
-    analogWrite (greenPin, buffer[1]);
-    analogWrite (bluePin, buffer[2]);
+    analogWrite (redPin, 255 - buffer[0]);
+    analogWrite (greenPin, 255 - buffer[1]);
+    analogWrite (bluePin, 255 - buffer[2]);
     numByte = -1;
   }
 }
