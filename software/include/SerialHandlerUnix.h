@@ -5,20 +5,38 @@
 
 class SerialHandler
 {
+private:
+    const unsigned int BUFFER_SIZE = 128;
+    unsigned char* buf;
+    unsigned int bufIndex;
+
+    void writeToBuffer(unsigned char c) {
+        buf[bufIndex] = c;
+        bufIndex++;
+        if (bufIndex >= BUFFER_SIZE) {
+		    boost::asio::write(serial, boost::asio::buffer(buf, sizeof(buf)));
+            bufIndex = 0;
+        }
+    }
 public:
+
+    ~SerialHandler() {
+        delete buf;
+    }
+
 	SerialHandler(std::string port, unsigned int baudRate) : io(), serial(io, port)
 	{
 		serial.set_option(boost::asio::serial_port_base::baud_rate(baudRate));
+        buf = new unsigned char[BUFFER_SIZE];
+        bufIndex = 0;
 	}
 
 	void writeSerial(unsigned char r, unsigned char g, unsigned char b) {
-		unsigned char c[4];
-		c[0] = 0xFF;
-		c[1] = r;
-		c[2] = g;
-		c[3] = b;
-		boost::asio::write(serial, boost::asio::buffer(c, sizeof(c)));
-	}
+        writeToBuffer(0xFF);
+        writeToBuffer(r);
+        writeToBuffer(g);
+        writeToBuffer(b);
+    }
 
 private:
 	boost::asio::io_service io;
